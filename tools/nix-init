@@ -1,0 +1,21 @@
+#!/bin/sh
+
+test "$1"x = x || fname="$1"
+shift
+
+#test "$TMPDIR" || TMPDIR="$XDG_RUNTIME_DIR"
+#export TMPDIR
+
+export SHELL=/bin/zsh
+
+# make nix-installed binaries available
+export PATH="$PATH:$HOME/.nix-profile/bin"
+
+# without this, nix doesn't find any channel
+export NIX_PATH=$HOME/.nix-defexpr/channels${NIX_PATH:+:}$NIX_PATH
+
+# without this, nix cannot fetch anything because of cert errors
+test "$SSL_CERT_FILE"x = x && export SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt
+
+exec proot -b "$HOME"/.nix/:/nix "${fname:-$SHELL}" "$@"
+#--kill-on-exit 
